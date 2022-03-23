@@ -1,18 +1,11 @@
-FROM alpine:3.12
-MAINTAINER Uri Savelchev <alterrebe@gmail.com>
+FROM alpine:3
+MAINTAINER Henrik Hansen <hhansen06@googlemail.com>
 
-# Packages: update
-RUN apk -U add postfix ca-certificates libsasl cyrus-sasl-plain cyrus-sasl-login py-pip supervisor rsyslog
+RUN apk add --no-cache postfix postfix-pcre py-pip
 RUN pip install j2cli
 
 # Add files
 ADD conf /root/conf
-RUN mkfifo /var/spool/postfix/public/pickup \
-    && ln -s /etc/postfix/aliases /etc/aliases
-
-# Configure: supervisor
-ADD bin/dfg.sh /usr/local/bin/
-ADD conf/supervisor-all.ini /etc/supervisor.d/
 
 # Runner
 ADD run.sh /root/run.sh
@@ -21,4 +14,5 @@ RUN chmod +x /root/run.sh
 # Declare
 EXPOSE 25
 
+RUN echo "maillog_file = /dev/stdout" >> /etc/postfix/main.cf
 CMD ["/root/run.sh"]
